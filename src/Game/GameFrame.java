@@ -66,7 +66,7 @@ class GameFrame extends JFrame implements KeyListener {
 
     @Override
     public void keyReleased(KeyEvent e) {
-        // logic for falling down?
+        // logic for falling down/stopping?
     }
 
 
