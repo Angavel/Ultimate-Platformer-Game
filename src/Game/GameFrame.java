@@ -17,7 +17,7 @@ class GameFrame extends JFrame implements KeyListener {
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setTitle("ULTIMATE PLATFORMER GAME");
         this.setSize(this.x, this.y); //stackoverflow says delete this?
-        this.setLayout(null);
+        this.setLayout(null); //
         this.addKeyListener(this);
         gameOver = false; // Resets the game over token, stops infinite looping
 
