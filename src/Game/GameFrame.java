@@ -14,6 +14,9 @@ import java.util.TimerTask;
 public class GameFrame extends JFrame implements KeyListener{
     static int xPos, yPos; // position of player in frame
     int time = 200; //how quickly main timer loops
+    boolean isJumping = false;
+    Timer t = new Timer();
+
 //    boolean gameOver = false;
 
     JLabel playerSprite;
@@ -58,7 +61,6 @@ public class GameFrame extends JFrame implements KeyListener{
 
     @Override
     public void keyTyped(KeyEvent e) {
-
     }
 
     @Override
@@ -106,23 +108,28 @@ public class GameFrame extends JFrame implements KeyListener{
 
     ///////////////////////MOVEMENT COMMANDS
     public void jump(String s){
-        if (s.equals("J")) {
 
-            Timer t = new Timer();
+        if (isJumping == false && s.equals("J")) { //start jump when key pressed
 
+            System.out.println("Key Pressed!");
             t.scheduleAtFixedRate(new TimerTask() { // creates a persistent timer instance
                 public void run(){
-                System.out.println("TIMER LOOP");
-            } //run method for timer
+                    System.out.println("TIMER LOOP");
+                    yPos -= 20;
+                    playerSprite.setLocation(xPos, yPos);
+                    isJumping = true;
+                } //run method for timer
 
-
-
-            }/*timer task*/,200, 200);
-
-            yPos -= 20;
-            playerSprite.setLocation(xPos, yPos);
+         }/*timer task*/,0, 200);
 
         } //if statement
+        else if (isJumping == true && s.equals("")){ // stop jump when key released
+            t.cancel(); //kills whole Timer()
+            isJumping = false;
+            System.out.println("CANCELLED");
+            t = new Timer(); //puts a new Timer() on the timer? I dunno it works (maybe theres a timer.pause command instead?)
+        } //else statement
+
     }// jump method
 
 
