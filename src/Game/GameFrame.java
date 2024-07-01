@@ -6,21 +6,22 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.TimerTask;
 import javax.swing.JFrame;
-//import javax.swing.Timer;
 import java.util.Timer;
 import java.util.TimerTask;
 
 
-public class GameFrame extends JFrame implements KeyListener{
+public class GameFrame extends JFrame implements KeyListener {
     static int xPos, yPos; // position of player in frame
-    int time = 200; //how quickly main timer loops
+    int refreshRate = 200; //how quickly main timer loops
     boolean isJumping = false;
-    Timer t = new Timer();
+    boolean isMoving = false;
+    static int xMomentum, yMomentum = 0; //store speed of moving left/right and up/down
+    Timer tJ = new Timer(); //for jumping
+    Timer tM = new Timer(); //for moving
 
 //    boolean gameOver = false;
 
     JLabel playerSprite;
-
 
 
     public GameFrame(int x, int y) {
@@ -46,8 +47,6 @@ public class GameFrame extends JFrame implements KeyListener{
         playerSprite.setVisible(true);
 
 
-
-
 //        this.add(restartButton);
 //        restartButton = new JButton();
 //        restartButton.setText("Restart?"); ////////////////////button no work yet
@@ -64,93 +63,117 @@ public class GameFrame extends JFrame implements KeyListener{
     }
 
     @Override
-    public void keyPressed(KeyEvent e) {
+    public void keyPressed(KeyEvent e) { // begin movement when key pressed
         switch (e.getKeyCode()) {
-            case KeyEvent.VK_W -> {
-                jump("J");
+            case KeyEvent.VK_W -> { //jump
+                Jump("J");
             }
             case KeyEvent.VK_A -> { //moving left
-                move("L");
+                Move("L");
             }
             case KeyEvent.VK_D -> { //moving right
-                move("R");
+                Move("R");
             }
         }
     }
 
     @Override
-    public void keyReleased(KeyEvent e) {
-        // logic for falling down/stopping?
+    public void keyReleased(KeyEvent e) { //cancel movement when key released
         switch (e.getKeyCode()) {
-            case KeyEvent.VK_W -> {
-                jump("");
+            case KeyEvent.VK_W -> {//jump
+                Jump("");
             }
             case KeyEvent.VK_A -> { //moving left
-                move("");
+                Move("");
             }
             case KeyEvent.VK_D -> { //moving right
-                move("");
+                Move("");
             }
         }
     }
 
 
-    public int get_xPos(){
+    public int get_xPos() {
         return xPos;
     }
 
-    public int get_yPos(){
+    public int get_yPos() {
         return yPos;
     }
 
 
-
-
-    ///////////////////////MOVEMENT COMMANDS
-    public void jump(String s){
+    ///////////////////////MOVEMENT COMMANDS////////////////////////////
+    public void Jump(String s) {   //// MOVING Y-AXIS MOVEMENT INTO FALL() METHOD!!!!!!!
 
         if (isJumping == false && s.equals("J")) { //start jump when key pressed
-
-            System.out.println("Key Pressed!");
-            t.scheduleAtFixedRate(new TimerTask() { // creates a persistent timer instance
-                public void run(){
-                    System.out.println("TIMER LOOP");
-                    yPos -= 20;
-                    playerSprite.setLocation(xPos, yPos);
-                    isJumping = true;
-                } //run method for timer
-
-         }/*timer task*/,0, 200);
+            System.out.println("Key Pressed JUMP!");
+            yPos -= 5;
+            yMomentum = 40;
+            isJumping = true;
 
         } //if statement
-        else if (isJumping == true && s.equals("")){ // stop jump when key released
-            t.cancel(); //kills whole Timer()
+
+        else if (isJumping == true && s.equals("")) { // stop jump when key released
             isJumping = false;
-            System.out.println("CANCELLED");
-            t = new Timer(); //puts a new Timer() on the timer? I dunno it works (maybe theres a timer.pause command instead?)
+            System.out.println("CANCELLED JUMP");
+
         } //else statement
 
     }// jump method
 
 
-
-    public void fall() {
-        if (yPos < 700) {
-            yPos -= 1;
+    public void Fall() {
+        if (yPos > 700){ //below 700
+            yMomentum = 0;
+            playerSprite.setLocation(xPos, 700); //Resets sprite to floor level if ever below.
         }
-    }
-
-    public void move(String s){ //TRUE is right FALSE is left
-        if (s.equals("R")){
-            xPos += 5;
-            playerSprite.setLocation(xPos, yPos);
-        } else  if (s.equals("L")){
-            xPos -= 5;
+        else if (yPos <= 700) {
+            yPos -= yMomentum;
+            if (yMomentum < 0)
+                yMomentum = 0;
+            if (yMomentum > 0);
+                yMomentum -= 10;
             playerSprite.setLocation(xPos, yPos);
         }
-    }
-//////////////////////////
 
+    }
+
+    public void Move(String s) { //to move either right or left. Receives string from keylistener event
+
+        if (isMoving == false && s.equals("R")) { //start moving right when key pressed
+
+            System.out.println("Key Pressed RIGHT!");
+            tM.scheduleAtFixedRate(new TimerTask() {
+                public void run() {
+                    System.out.println("TIMER LOOP RIGHT");
+                    xPos += 10;
+                    playerSprite.setLocation(xPos, yPos);
+                    isMoving = true;
+                } //run method for timer
+
+            }/*timer task*/, 0, refreshRate);
+
+        } else if (isMoving == false && s.equals("L")) { //start moving left when key pressed
+
+            System.out.println("Key Pressed LEFT!");
+            tM.scheduleAtFixedRate(new TimerTask() {
+                public void run() {
+                    System.out.println("TIMER LOOP LEFT");
+                    xPos -= 10;
+                    playerSprite.setLocation(xPos, yPos);
+                    isMoving = true;
+                } //run method for timer
+
+            }/*timer task*/, 0, refreshRate);
+
+        } else if (isMoving == true && s.equals("")) { // stop moving either direction when key released
+            tM.cancel(); //kills whole Timer()
+            isMoving = false;
+            System.out.println("CANCELLED MOVE");
+            tM = new Timer(); //puts a new Timer() on the timer? I dunno it works (maybe theres a timer.pause command instead?)
+        } //else statement
+    } // Moving x-axis Method
+//////////////////////////////////////////////////////////////////////////////////
 
 
 } //GameFrame class
